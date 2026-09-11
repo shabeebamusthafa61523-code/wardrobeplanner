@@ -17,7 +17,15 @@ const comboRoutes = require('./src/routes/combo.routes');
 const authRoutes = require('./src/routes/auth.routes');
 const adminRoutes = require('./src/routes/admin.routes');
 
+const fs = require('fs');
+
 const app = express();
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // Connect MongoDB
 connectDB();
@@ -28,7 +36,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static uploaded clothing images
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 // Health Check API
 app.get('/api/health', (req, res) => {
@@ -48,6 +56,15 @@ app.use('/api/planner', authMiddleware, plannerRoutes);
 app.use('/api/ai', authMiddleware, aiRoutes);
 app.use('/api/combos', authMiddleware, comboRoutes);
 app.use('/api/admin', authMiddleware, superadminMiddleware, adminRoutes);
+
+// Serve static built frontend assets in production
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+}
 
 // Global Error Handler
 app.use((err, req, res, next) => {
