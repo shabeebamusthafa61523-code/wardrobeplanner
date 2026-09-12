@@ -14,6 +14,7 @@ const scanOutfit = async (req, res) => {
     }
 
     const imagePath = req.file.path;
+    let imageUrl = `/uploads/${req.file.filename}`;
 
     // 1. Describe outfit using Gemini vision (what categories/colors are visible)
     const aiAnalysis = await aiService.analyzeOutfitImage(imagePath);
@@ -27,7 +28,9 @@ const scanOutfit = async (req, res) => {
 
     // 3. Upload to Cloudinary after local AI analysis completes
     const cloudRes = await uploadToCloudinary(imagePath, 'scanned_outfits');
-    const imageUrl = cloudRes.secure_url;
+    if (cloudRes && cloudRes.secure_url) {
+      imageUrl = cloudRes.secure_url;
+    }
 
     res.json({
       success: true,

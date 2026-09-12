@@ -1,6 +1,7 @@
 const WardrobeItem = require('../models/WardrobeItem');
 const WearRecord = require('../models/WearRecord');
 const repeatService = require('../services/repeatDetection.service');
+const { uploadToCloudinary } = require('../config/cloudinary');
 
 // Get all wardrobe items with filtering & wear data
 const getWardrobeItems = async (req, res) => {
@@ -85,11 +86,13 @@ const createWardrobeItem = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Clothing photo is required' });
     }
 
-    let imageUrl = req.body.imageUrl || '';
+    let imageUrl = req.file ? `/uploads/${req.file.filename}` : (req.body.imageUrl || '');
 
     if (req.file) {
       const cloudRes = await uploadToCloudinary(req.file.path, 'wardrobe_items');
-      imageUrl = cloudRes.secure_url;
+      if (cloudRes && cloudRes.secure_url) {
+        imageUrl = cloudRes.secure_url;
+      }
     }
 
     const defaultName = name && name.trim() ? name.trim() : `Clothing Item #${Math.floor(100 + Math.random() * 900)}`;
@@ -122,8 +125,11 @@ const updateWardrobeItem = async (req, res) => {
     const updateFields = req.body;
 
     if (req.file) {
+      updateFields.imageUrl = `/uploads/${req.file.filename}`;
       const cloudRes = await uploadToCloudinary(req.file.path, 'wardrobe_items');
-      updateFields.imageUrl = cloudRes.secure_url;
+      if (cloudRes && cloudRes.secure_url) {
+        updateFields.imageUrl = cloudRes.secure_url;
+      }
     }
 
     if (updateFields.category) {

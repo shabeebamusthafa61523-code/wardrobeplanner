@@ -3,22 +3,21 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
 /**
- * Upload a local file directly to Cloudinary (Strict Cloudinary Storage)
+ * Upload a local file to Cloudinary safely
  * @param {string} localFilePath - Path to temp file stored locally by multer
  * @param {string} folder - Destination folder on Cloudinary
- * @returns {Promise<{ secure_url: string, public_id: string }>}
+ * @returns {Promise<{ secure_url: string, public_id: string } | null>}
  */
 const uploadToCloudinary = async (localFilePath, folder = 'wardrobe_items') => {
-  if (!localFilePath) {
-    throw new Error('No local image file provided for Cloudinary upload.');
-  }
+  if (!localFilePath) return null;
 
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
   if (!cloudName || !apiKey || !apiSecret) {
-    throw new Error('Cloudinary credentials (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) missing in .env');
+    console.warn('Cloudinary credentials missing in .env');
+    return null;
   }
 
   cloudinary.config({
@@ -33,19 +32,15 @@ const uploadToCloudinary = async (localFilePath, folder = 'wardrobe_items') => {
       resource_type: 'auto',
     });
 
-    // Clean up temporary local file after Cloudinary upload
+    // Clean up temporary local file after successful Cloudinary upload
     if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
 
     return result;
   } catch (error) {
-    // Clean up local temp file on error too
-    if (fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
-    }
-    console.error('Cloudinary Upload Failed:', error.message || error);
-    throw new Error(`Cloudinary upload failed: ${error.message || 'Check Cloudinary credentials and API limit.'}`);
+    console.warn('Cloudinary Upload Notice (Falling back to local storage):', error.message || error);
+    return null;
   }
 };
 
