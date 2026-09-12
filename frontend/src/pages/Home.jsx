@@ -87,7 +87,6 @@ export const Home = () => {
                 <p className="text-sand-600 text-sm mt-1 flex items-center gap-1.5">
                   <TimeIcon className="h-4 w-4 text-amber-500" />
                   <span>What are you wearing today?</span>
-                  <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                 </p>
               </div>
             </div>
