@@ -7,6 +7,7 @@ import { getCroppedImg } from '../utils/cropImage';
 const CATEGORIES = ['Kurti', 'Shirt', 'Top', 'Pants', 'Jeans', 'Dress', 'Saree', 'Scarf', 'Other'];
 
 export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
+  const [name, setName] = useState('');
   const [category, setCategory] = useState('Kurti');
   const [notes, setNotes] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -72,6 +73,9 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
     try {
       setLoading(true);
       const formData = new FormData();
+      if (name.trim()) {
+        formData.append('name', name.trim());
+      }
       formData.append('category', category);
       formData.append('notes', notes);
 
@@ -96,6 +100,7 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
   };
 
   const handleClose = () => {
+    setName('');
     setCategory('Kurti');
     setNotes('');
     setImageFile(null);
@@ -316,10 +321,24 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
                 />
               </div>
             )}
-          </div>
+            </div>
 
-          {/* Category Dropdown */}
-          <div>
+            {/* Optional Item / Dress Name */}
+            <div>
+              <label className="block text-xs font-semibold text-sand-700 uppercase tracking-wider mb-1.5">
+                Dress / Item Name (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Blue Floral Kurti, Favorite Party Dress..."
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-sand-300 focus:outline-none focus:ring-2 focus:ring-slate-800 text-sm font-medium bg-white"
+              />
+            </div>
+
+            {/* Category Dropdown */}
+            <div>
             <label className="block text-xs font-semibold text-sand-700 uppercase tracking-wider mb-1.5">
               Category <span className="text-rose-500">*</span>
             </label>

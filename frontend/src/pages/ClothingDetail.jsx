@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Calendar, Shirt, Trash2, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react';
-import { fetchWardrobeItemById, deleteWardrobeItem, recordWear } from '../services/api';
+import { ArrowLeft, Clock, Calendar, Shirt, Trash2, CheckCircle2, AlertTriangle, Sparkles, Edit3, Check } from 'lucide-react';
+import { fetchWardrobeItemById, deleteWardrobeItem, recordWear, updateWardrobeItem } from '../services/api';
 import { Badge } from '../components/Badge';
 
 export const ClothingDetail = () => {
@@ -13,6 +13,11 @@ export const ClothingDetail = () => {
   const [msg, setMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Name Editing State
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [savingName, setSavingName] = useState(false);
+
   useEffect(() => {
     loadItem();
   }, [id]);
@@ -22,10 +27,25 @@ export const ClothingDetail = () => {
       setLoading(true);
       const res = await fetchWardrobeItemById(id);
       setItem(res.data);
+      if (res.data) setEditedName(res.data.name || '');
       setLoading(false);
     } catch (err) {
       console.error('Error fetching item details:', err);
       setLoading(false);
+    }
+  };
+
+  const handleSaveName = async () => {
+    if (!editedName.trim()) return;
+    try {
+      setSavingName(true);
+      const res = await updateWardrobeItem(id, { name: editedName.trim() });
+      setItem(res.data);
+      setIsEditingName(false);
+      setSavingName(false);
+    } catch (err) {
+      setSavingName(false);
+      setErrorMsg('Failed to update dress name.');
     }
   };
 
@@ -127,13 +147,42 @@ export const ClothingDetail = () => {
         <div className="p-6 md:p-8 flex flex-col justify-between space-y-6">
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-4">
-              <div>
+              <div className="flex-1">
                 <Badge variant="neutral" className="mb-2">
                   {item.category}
                 </Badge>
-                <h1 className="text-2xl font-extrabold text-sand-900 tracking-tight">
-                  {item.name}
-                </h1>
+                {isEditingName ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      className="px-3 py-1.5 rounded-xl border border-sand-300 focus:outline-none focus:ring-2 focus:ring-slate-800 text-lg font-bold text-sand-900 w-full"
+                      placeholder="Enter dress name..."
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      disabled={savingName}
+                      className="p-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors flex-shrink-0"
+                      title="Save name"
+                    >
+                      <Check className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 group">
+                    <h1 className="text-2xl font-extrabold text-sand-900 tracking-tight">
+                      {item.name}
+                    </h1>
+                    <button
+                      onClick={() => setIsEditingName(true)}
+                      className="p-1 text-sand-400 hover:text-slate-900 rounded-lg hover:bg-sand-100 transition-colors"
+                      title="Edit dress name"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button
