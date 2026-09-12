@@ -85,7 +85,15 @@ const createWardrobeItem = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Clothing photo is required' });
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl;
+    let imageUrl = req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl;
+
+    if (req.file) {
+      const cloudRes = await uploadToCloudinary(req.file.path, 'wardrobe_items');
+      if (cloudRes && cloudRes.secure_url) {
+        imageUrl = cloudRes.secure_url;
+      }
+    }
+
     const defaultName = name && name.trim() ? name.trim() : `Clothing Item #${Math.floor(100 + Math.random() * 900)}`;
 
     const newItem = await WardrobeItem.create({
@@ -117,6 +125,10 @@ const updateWardrobeItem = async (req, res) => {
 
     if (req.file) {
       updateFields.imageUrl = `/uploads/${req.file.filename}`;
+      const cloudRes = await uploadToCloudinary(req.file.path, 'wardrobe_items');
+      if (cloudRes && cloudRes.secure_url) {
+        updateFields.imageUrl = cloudRes.secure_url;
+      }
     }
 
     if (updateFields.category) {
