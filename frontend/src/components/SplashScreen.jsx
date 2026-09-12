@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, Volume2, VolumeX, Play } from 'lucide-react';
 
 export const SplashScreen = ({
   desktopVideo = '/splash.mp4',
@@ -9,6 +9,7 @@ export const SplashScreen = ({
   const [fadingOut, setFadingOut] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [videoError, setVideoError] = useState(false);
+  const [needsUserTap, setNeedsUserTap] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const videoRef = useRef(null);
 
@@ -22,20 +23,33 @@ export const SplashScreen = ({
 
   const currentVideoSrc = isMobile ? mobileVideo : desktopVideo;
 
-  useEffect(() => {
-    // Attempt autoplay
-    if (videoRef.current) {
-      videoRef.current.load();
-      videoRef.current.play().catch(() => {
-        // Autoplay policy prevented playback or file missing
-        setVideoError(true);
-      });
+  const attemptPlay = () => {
+    const v = videoRef.current;
+    if (v) {
+      v.defaultMuted = true;
+      v.muted = true;
+      const playPromise = v.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setNeedsUserTap(false);
+            setVideoError(false);
+          })
+          .catch((err) => {
+            console.warn('Autoplay prevented or waiting for user interaction:', err);
+            setNeedsUserTap(true);
+          });
+      }
     }
+  };
 
-    // Auto-dismiss after 6 seconds max if video is stuck or long
+  useEffect(() => {
+    attemptPlay();
+
+    // Auto-dismiss safety timer (10s max)
     const maxTimer = setTimeout(() => {
       handleFinish();
-    }, 6000);
+    }, 10000);
 
     return () => clearTimeout(maxTimer);
   }, [currentVideoSrc]);
@@ -44,7 +58,7 @@ export const SplashScreen = ({
     setFadingOut(true);
     setTimeout(() => {
       onComplete && onComplete();
-    }, 500); // 500ms fade transition
+    }, 500);
   };
 
   const toggleMute = () => {
@@ -54,8 +68,21 @@ export const SplashScreen = ({
     }
   };
 
+  const handleUserTapPlay = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      setIsMuted(false);
+      videoRef.current.play().then(() => {
+        setNeedsUserTap(false);
+      }).catch(() => {
+        handleFinish();
+      });
+    }
+  };
+
   return (
     <div
+      onClick={needsUserTap ? handleUserTapPlay : undefined}
       className={`fixed inset-0 z-[100] bg-slate-950 text-white flex flex-col justify-between overflow-hidden transition-opacity duration-500 ${
         fadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
@@ -64,19 +91,18 @@ export const SplashScreen = ({
       {!videoError ? (
         <video
           ref={videoRef}
-          key={currentVideoSrc}
+          src={currentVideoSrc}
           autoPlay
-          muted={isMuted}
+          muted
           playsInline
+          onLoadedData={attemptPlay}
+          onCanPlay={attemptPlay}
           onEnded={handleFinish}
           onError={() => setVideoError(true)}
           className="absolute inset-0 w-full h-full object-cover z-0"
-        >
-          <source src={mobileVideo} media="(max-width: 767px)" type="video/mp4" />
-          <source src={desktopVideo} media="(min-width: 768px)" type="video/mp4" />
-        </video>
+        />
       ) : (
-        /* Fallback Animated Gradient & Logo if video file not yet added */
+        /* Fallback Animated Gradient & Logo if video file cannot be decoded */
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950 flex flex-col items-center justify-center p-6 text-center z-0">
           <div className="relative mb-6">
             <div className="w-24 h-24 rounded-3xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center animate-pulse">
@@ -90,6 +116,16 @@ export const SplashScreen = ({
           <p className="text-xs sm:text-sm font-medium text-amber-300/80 uppercase tracking-widest">
             Personal Outfit Planner
           </p>
+        </div>
+      )}
+
+      {/* User Tap Prompt if Browser Policy Blocked Autoplay */}
+      {needsUserTap && !videoError && (
+        <div className="absolute inset-0 z-30 bg-slate-950/70 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center cursor-pointer">
+          <div className="p-5 rounded-full bg-amber-400 text-slate-900 shadow-2xl animate-bounce mb-3">
+            <Play className="h-8 w-8 fill-slate-900 ml-1" />
+          </div>
+          <p className="text-sm font-extrabold text-white">Tap anywhere to play video</p>
         </div>
       )}
 
