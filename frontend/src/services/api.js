@@ -1,8 +1,18 @@
 import axios from 'axios';
 
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://wardrobeplanner-1.onrender.com/api';
+export const SERVER_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
 });
+
+// Helper to ensure relative /uploads/ image paths point to the backend server
+export const formatImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${SERVER_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 // Returns true only when a real user token exists (not guest/default)
 export const isLoggedIn = () => {
@@ -30,9 +40,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto-recover on 401 stale token errors
+// Helper to fix /uploads/ image paths recursively in response JSON
+const fixImageUrlsInObject = (obj) => {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(fixImageUrlsInObject);
+
+  const newObj = { ...obj };
+  if (typeof newObj.imageUrl === 'string' && newObj.imageUrl.startsWith('/uploads')) {
+    newObj.imageUrl = formatImageUrl(newObj.imageUrl);
+  }
+  for (const key in newObj) {
+    if (newObj[key] && typeof newObj[key] === 'object') {
+      newObj[key] = fixImageUrlsInObject(newObj[key]);
+    }
+  }
+  return newObj;
+};
+
+// Response Interceptor: fix image URLs & handle 401
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response && response.data) {
+      response.data = fixImageUrlsInObject(response.data);
+    }
+    return response;
+  },
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('wardrobe_token');
