@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Camera, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { X, Camera, Sparkles, Image as ImageIcon, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { createWardrobeItem } from '../services/api';
 
 const CATEGORIES = ['Kurti', 'Shirt', 'Top', 'Pants', 'Jeans', 'Dress', 'Saree', 'Scarf', 'Other'];
@@ -48,7 +48,7 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
       }
 
       const res = await createWardrobeItem(formData);
-      setSuccessMsg(res.message || `✓ ${category} added to your wardrobe.`);
+      setSuccessMsg(res.message || `${category} added to your wardrobe.`);
       setLoading(false);
 
       setTimeout(() => {
@@ -78,7 +78,7 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
         {/* Header */}
         <div className="px-6 py-4 border-b border-sand-100 flex items-center justify-between bg-sand-50">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain" />
+            <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain logo-theme-aware" />
             <h2 className="text-lg font-bold text-sand-900">Add to Wardrobe</h2>
           </div>
           <button
@@ -93,14 +93,14 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
           {error && (
             <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-2 font-medium">
-              <span>⚠️</span>
+              <AlertTriangle className="h-4 w-4 text-rose-600 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
             <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2 font-semibold animate-pulse">
-              <span>✓</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}

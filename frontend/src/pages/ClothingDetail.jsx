@@ -47,9 +47,9 @@ export const ClothingDetail = () => {
           override: true,
           source: 'manual',
         });
-        setMsg(overrideRes.message || '✓ Marked as worn today.');
+        setMsg(overrideRes.message || 'Marked as worn today.');
       } else {
-        setMsg(res.message || '✓ Marked as worn today.');
+        setMsg(res.message || 'Marked as worn today.');
       }
 
       setMarking(false);

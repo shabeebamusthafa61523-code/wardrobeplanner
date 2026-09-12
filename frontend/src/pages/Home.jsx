@@ -10,6 +10,9 @@ import {
   Plus,
   ArrowRight,
   Clock,
+  Sun,
+  Moon,
+  XCircle,
 } from 'lucide-react';
 import { fetchTodayOutfit, fetchWearHistory, fetchRecommendation, deleteTodayOutfit } from '../services/api';
 import { WearTrackerModal } from '../components/WearTrackerModal';
@@ -71,17 +74,20 @@ export const Home = () => {
         const userName = localStorage.getItem('wardrobe_user_name') || '';
         const displayName = userName ? userName.charAt(0).toUpperCase() + userName.slice(1) : '';
         const hour = new Date().getHours();
-        const timeEmoji = hour < 12 ? '🌅' : hour < 17 ? '☀️' : '🌙';
+        const TimeIcon = hour < 12 ? Sun : hour < 17 ? Sun : Moon;
         return (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-sand-100 via-white to-sand-100 dark:bg-none dark:bg-[#151e2e] p-6 rounded-3xl border border-sand-200 shadow-xs">
             <div className="flex items-center gap-4">
-              <img src="/logo.png" alt="Logo" className="h-14 w-14 object-contain flex-shrink-0 drop-shadow-md" />
+              <img src="/logo.png" alt="Logo" className="h-14 w-14 object-contain flex-shrink-0 drop-shadow-md logo-theme-aware" />
               <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-sand-900 tracking-tight">
-                  {displayName ? `Hey ${displayName} 👗` : 'Hey there 👗'}
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-sand-900 tracking-tight flex items-center gap-2">
+                  <span>{displayName ? `Hey ${displayName}` : 'Hey there'}</span>
+                  <Shirt className="h-6 w-6 text-sand-700 dark:text-sand-300" />
                 </h1>
-                <p className="text-sand-600 text-sm mt-1">
-                  {timeEmoji} What are you wearing today? ✨
+                <p className="text-sand-600 text-sm mt-1 flex items-center gap-1.5">
+                  <TimeIcon className="h-4 w-4 text-amber-500" />
+                  <span>What are you wearing today?</span>
+                  <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                 </p>
               </div>
             </div>
@@ -99,12 +105,13 @@ export const Home = () => {
       <section className="bg-white rounded-3xl border border-sand-200 p-6 shadow-sm relative overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-5 w-5 object-contain" />
+            <img src="/logo.png" alt="Logo" className="h-5 w-5 object-contain logo-theme-aware" />
             <h2 className="text-lg font-bold text-sand-900">Today's Outfit</h2>
           </div>
           {todayOutfits.length > 0 && (
-            <Badge variant="success" className="px-3 py-1">
-              ✓ {todayOutfits.length} Saved Today
+            <Badge variant="success" className="px-3 py-1 flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+              <span>{todayOutfits.length} Saved Today</span>
             </Badge>
           )}
         </div>
@@ -179,7 +186,14 @@ export const Home = () => {
                 disabled={isRemoving}
                 className="text-xs font-bold text-rose-500 hover:text-rose-700 underline underline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isRemoving ? 'Removing…' : "❌ Haven't Worn Today"}
+                {isRemoving ? (
+                  'Removing…'
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <XCircle className="h-3.5 w-3.5 inline" />
+                    Haven't Worn Today
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -205,7 +219,7 @@ export const Home = () => {
                 className="w-full sm:w-auto flex-1 px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <Camera className="h-4 w-4 text-amber-300" />
-                <span>📸 Scan Today's Outfit</span>
+                <span>Scan Today's Outfit</span>
               </button>
             </div>
           </div>
@@ -223,7 +237,7 @@ export const Home = () => {
             <div className="mt-1 space-y-0.5">
               {warnings.map((w, idx) => (
                 <p key={idx} className="text-xs font-semibold text-amber-800">
-                  ⚠️ {w.message}
+                  {w.message}
                 </p>
               ))}
             </div>
@@ -231,8 +245,8 @@ export const Home = () => {
         </div>
       ) : (
         <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-3 text-emerald-900 text-xs font-semibold">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-          <span>✓ No recent outfit repetition detected. Your wardrobe rotation is fresh!</span>
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+          <span>No recent outfit repetition detected. Your wardrobe rotation is fresh!</span>
         </div>
       )}
 
@@ -294,7 +308,7 @@ export const Home = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-amber-300" />
-              <h2 className="text-base font-bold tracking-tight">✨ Suggested for Today</h2>
+              <h2 className="text-base font-bold tracking-tight">Suggested for Today</h2>
             </div>
             <span className="text-[11px] text-sand-300 font-medium">Smart Rotation Rule</span>
           </div>
@@ -366,7 +380,13 @@ export const Home = () => {
                   <Clock className="h-3 w-3 text-sand-400" />
                   <span className="text-[11px] font-bold">{outfit.date}</span>
                   <Badge variant="neutral" className="ml-auto text-[10px]">
-                    {outfit.source === 'ai' ? '📸 AI' : 'Manual'}
+                    {outfit.source === 'ai' ? (
+                      <span className="flex items-center gap-1">
+                        <Camera className="h-3 w-3 inline" /> AI
+                      </span>
+                    ) : (
+                      'Manual'
+                    )}
                   </Badge>
                 </div>
 

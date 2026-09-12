@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Calendar as CalendarIcon, Plus, Trash2, AlertTriangle, Sparkles, Shirt,
-  ChevronLeft, ChevronRight, Clock, CheckCircle2, RotateCcw, Bookmark,
+  ChevronLeft, ChevronRight, Clock, CheckCircle2, RotateCcw, Bookmark, Camera,
 } from "lucide-react";
 import {
   fetchWeeklyPlanner, updatePlannerDay, removePlannerDay, fetchWearHistory,
@@ -478,12 +478,12 @@ export const WeeklyPlanner = () => {
                         {cellDate.getDate()}
                       </span>
                       {hasWorn ? (
-                        <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full">
-                          ✓ Worn
+                        <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                          <CheckCircle2 className="h-2.5 w-2.5" /> Worn
                         </span>
                       ) : hasPlanned ? (
-                        <span className="text-[9px] font-extrabold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-full">
-                          📌 Planned
+                        <span className="text-[9px] font-extrabold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                          <Bookmark className="h-2.5 w-2.5" /> Planned
                         </span>
                       ) : null}
                     </div>
@@ -559,15 +559,21 @@ export const WeeklyPlanner = () => {
               {/* Recorded Worn Outfits */}
               {selectedCalendarDay.records && selectedCalendarDay.records.length > 0 && (
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
-                    ✓ Recorded Wear History
+                  <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Recorded Wear History
                   </span>
                   {selectedCalendarDay.records.map((rec, idx) => (
                     <div key={rec._id || idx} className="bg-emerald-50/60 rounded-2xl p-4 border border-emerald-200 space-y-3">
                       <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
                         <span>Worn Outfit #{idx + 1}</span>
                         <Badge variant={rec.source === "ai" ? "accent" : "neutral"} className="text-[10px]">
-                          {rec.source === "ai" ? "📸 AI Scan" : "Manual"}
+                          {rec.source === "ai" ? (
+                            <span className="flex items-center gap-1">
+                              <Camera className="h-3 w-3 inline" /> AI Scan
+                            </span>
+                          ) : (
+                            "Manual"
+                          )}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
@@ -593,8 +599,8 @@ export const WeeklyPlanner = () => {
               {selectedCalendarDay.planned && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-800 uppercase tracking-wider block">
-                      📌 Planned Outfit
+                    <span className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                      <Bookmark className="h-3.5 w-3.5" /> Planned Outfit
                     </span>
                     <button
                       onClick={() => handleClearDay(selectedCalendarDay)}

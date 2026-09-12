@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home, Shirt, Calendar, History, Camera, Plus, User, LogOut, Shield, Sun, Moon } from 'lucide-react';
+import { Home, Shirt, Calendar, History, Camera, Plus, User, LogOut, Shield, Sun, Moon, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { AddClothingModal } from './AddClothingModal';
 import { WearTrackerModal } from './WearTrackerModal';
 import { UserAuthModal } from './UserAuthModal';
@@ -83,7 +83,7 @@ export const Layout = ({ children, onRefreshData }) => {
       localStorage.setItem('wardrobe_user_role', res.user.role);
       localStorage.setItem('wardrobe_user_name', res.user.name);
       localStorage.setItem('wardrobe_user_id', res.user._id);
-      setPinSuccess(res.message || '✓ You are now superadmin!');
+      setPinSuccess(res.message || 'You are now superadmin!');
       setTimeout(() => { setIsPinModalOpen(false); window.location.reload(); }, 1500);
     } catch (err) {
       setPinError(err.response?.data?.error || 'Incorrect PIN. Try again.');
@@ -304,13 +304,15 @@ export const Layout = ({ children, onRefreshData }) => {
               </p>
 
               {pinError && (
-                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold text-center">
-                  ❌ {pinError}
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center justify-center gap-1.5">
+                  <AlertTriangle className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                  <span>{pinError}</span>
                 </div>
               )}
               {pinSuccess && (
-                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center animate-pulse">
-                  {pinSuccess}
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-center gap-1.5 animate-pulse">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                  <span>{pinSuccess}</span>
                 </div>
               )}
 

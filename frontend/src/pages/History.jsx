@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { History as HistoryIcon, Filter, Search, Clock, Calendar as CalendarIcon, Shirt } from 'lucide-react';
+import { History as HistoryIcon, Filter, Search, Clock, Calendar as CalendarIcon, Shirt, Camera } from 'lucide-react';
 import { fetchWearHistory, fetchWardrobeItems } from '../services/api';
 import { Badge } from '../components/Badge';
 
@@ -146,7 +146,13 @@ export const History = () => {
                   <span className="text-xs font-extrabold">{record.date}</span>
                 </div>
                 <Badge variant={record.source === 'ai' ? 'accent' : 'neutral'}>
-                  {record.source === 'ai' ? '📸 AI' : 'Manual'}
+                  {record.source === 'ai' ? (
+                    <span className="flex items-center gap-1">
+                      <Camera className="h-3 w-3 inline" /> AI
+                    </span>
+                  ) : (
+                    'Manual'
+                  )}
                 </Badge>
               </div>
 

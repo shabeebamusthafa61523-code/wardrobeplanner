@@ -105,7 +105,7 @@ export const WearTrackerModal = ({
   const handleSelectCombo = (combo) => {
     const comboItemIds = combo.itemIds.map((i) => i._id || i);
     setSelectedIds(comboItemIds);
-    setSuccessMsg(`✓ Loaded combo "${combo.name}"`);
+    setSuccessMsg(`Loaded combo "${combo.name}"`);
     setTimeout(() => setSuccessMsg(''), 1500);
   };
 
@@ -122,7 +122,7 @@ export const WearTrackerModal = ({
         name: comboNameInput,
         itemIds: selectedIds,
       });
-      setSuccessMsg(res.message || `✓ Saved combo created!`);
+      setSuccessMsg(res.message || 'Saved combo created!');
       setComboNameInput('');
       setIsSavingCombo(false);
       loadData();
@@ -149,7 +149,7 @@ export const WearTrackerModal = ({
     }
 
     if (isPlannerMode) {
-      setSuccessMsg('✓ Outfit selected for planner.');
+      setSuccessMsg('Outfit selected for planner.');
       setTimeout(() => {
         onWearSaved && onWearSaved({ itemIds: selectedIds });
         handleClose();
@@ -177,7 +177,7 @@ export const WearTrackerModal = ({
         return;
       }
 
-      setSuccessMsg(res.message || '✓ Today\'s outfit saved.');
+      setSuccessMsg(res.message || 'Today\'s outfit saved.');
       setSubmitting(false);
 
       setTimeout(() => {
@@ -381,7 +381,7 @@ export const WearTrackerModal = ({
                 <Star className="h-10 w-10 text-amber-400 mx-auto mb-2" />
                 <h3 className="font-bold text-sand-900 text-sm">No saved combos yet</h3>
                 <p className="text-xs text-sand-500 mt-1 max-w-sm mx-auto">
-                  Select clothes from the Wardrobe tab and tap "⭐️ Save as Combo" to create 1-tap reusable sets!
+                  Select clothes from the Wardrobe tab and tap "Save as Combo" to create 1-tap reusable sets!
                 </p>
               </div>
             ) : (
@@ -452,7 +452,7 @@ export const WearTrackerModal = ({
                       <div className="mt-3 pt-2 border-t border-sand-100/20 flex items-center justify-between text-[11px] font-bold">
                         <span>{combo.itemIds.length} Clothes Set</span>
                         <span className={isSelectedCombo ? 'text-amber-300' : 'text-slate-800'}>
-                          {isSelectedCombo ? '✓ Selected' : 'Tap to Select →'}
+                          {isSelectedCombo ? 'Selected' : 'Tap to Select →'}
                         </span>
                       </div>
                     </div>

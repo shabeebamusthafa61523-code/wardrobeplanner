@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Shield, Shirt, History as HistoryIcon, Trash2,
   ChevronLeft, Crown, Calendar, KeyRound, Eye, EyeOff,
-  CheckCircle2, AlertTriangle, UserCircle2,
+  CheckCircle2, AlertTriangle, UserCircle2, Lock, Camera,
 } from "lucide-react";
 import {
   adminGetUsers, adminGetUserWardrobe, adminGetUserHistory,
@@ -91,7 +91,7 @@ export const AdminPanel = () => {
     setResetMsg(null);
     try {
       const res = await adminResetUserPassword(selectedUser._id, newPassword);
-      setResetMsg({ type: "success", text: res.message || "✓ Password reset." });
+      setResetMsg({ type: "success", text: res.message || "Password reset." });
       setNewPassword("");
     } catch (err) {
       setResetMsg({ type: "error", text: err.response?.data?.error || "Failed to reset password." });
@@ -210,8 +210,9 @@ export const AdminPanel = () => {
                 {/* Password note */}
                 <div className="bg-amber-50 rounded-2xl border border-amber-200 p-4 sm:col-span-2">
                   <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1">Password</p>
-                  <p className="text-xs font-semibold text-amber-800">
-                    🔒 Stored as a secure hash — cannot be viewed. Use the form below to reset it.
+                  <p className="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
+                    <Lock className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
+                    <span>Stored as a secure hash — cannot be viewed. Use the form below to reset it.</span>
                   </p>
                 </div>
               </div>
@@ -223,48 +224,58 @@ export const AdminPanel = () => {
                 <KeyRound className="h-4 w-4 text-slate-700" />
                 <h3 className="text-sm font-extrabold text-sand-900 uppercase tracking-wider">Reset Password</h3>
               </div>
-
-              {resetMsg && (
-                <div className={`mb-4 p-3 rounded-2xl flex items-center gap-2 text-xs font-bold ${
-                  resetMsg.type === "success"
-                    ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-                    : "bg-rose-50 border border-rose-200 text-rose-800"
-                }`}>
-                  {resetMsg.type === "success"
-                    ? <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                    : <AlertTriangle className="h-4 w-4 text-rose-500 flex-shrink-0" />}
-                  {resetMsg.text}
+              <form onSubmit={handleResetPassword} className="space-y-4 max-w-sm">
+                <div>
+                  <label className="block text-xs font-bold text-sand-700 mb-1">New Password</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Minimum 4 characters"
+                      required
+                      minLength={4}
+                      className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-xs font-medium focus:ring-2 focus:ring-slate-800 focus:outline-none pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-sand-400 hover:text-sand-700"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
-              )}
 
-              <form onSubmit={handleResetPassword} className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter new password..."
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full pr-10 pl-4 py-3 rounded-2xl bg-sand-50 border border-sand-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-800"
-                    required
-                    minLength={4}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-sand-400 hover:text-sand-700"
+                {resetMsg && (
+                  <div
+                    className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
+                      resetMsg.type === "success"
+                        ? "bg-emerald-50 text-emerald-900 border border-emerald-200"
+                        : "bg-rose-50 text-rose-900 border border-rose-200"
+                    }`}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+                    {resetMsg.type === "success" ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                    )}
+                    <span>{resetMsg.text}</span>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  disabled={resetting || !newPassword.trim()}
-                  className="px-6 py-3 rounded-2xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-all disabled:opacity-50 flex items-center gap-2 shadow-md"
+                  disabled={resetting || !newPassword}
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2 shadow-sm"
                 >
                   {resetting ? (
-                    <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Resetting…</>
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Resetting…</span>
+                    </>
                   ) : (
-                    <><KeyRound className="h-4 w-4" /> Reset Password</>
+                    "Reset Password"
                   )}
                 </button>
               </form>
@@ -280,67 +291,74 @@ export const AdminPanel = () => {
               <p className="text-xs">Loading...</p>
             </div>
           ) : tab === "wardrobe" ? (
-            userItems.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-sand-300">
-                <p className="text-sand-500 text-sm font-semibold">No wardrobe items yet.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {userItems.map((item) => (
-                  <div key={item._id} className="bg-white rounded-2xl border border-sand-200 overflow-hidden shadow-sm hover:shadow-md transition-all">
-                    <div className="aspect-square bg-sand-100 flex items-center justify-center overflow-hidden">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <Shirt className="h-10 w-10 text-sand-300" />
-                      )}
+            /* ── WARDROBE TAB ── */
+            <div>
+              {userItems.length === 0 ? (
+                <div className="bg-white rounded-3xl border border-sand-200 p-8 text-center text-sand-400">
+                  <Shirt className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-xs font-semibold">No wardrobe items added yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {userItems.map((item) => (
+                    <div key={item._id} className="bg-white rounded-2xl border border-sand-200 overflow-hidden shadow-xs">
+                      <img src={item.imageUrl} alt={item.name} className="w-full h-28 object-cover" />
+                      <div className="p-2.5 text-center">
+                        <p className="text-xs font-extrabold text-sand-900 truncate">{item.name}</p>
+                        <p className="text-[10px] text-sand-400 capitalize">{item.category} · {item.color}</p>
+                      </div>
                     </div>
-                    <div className="p-2.5">
-                      <p className="text-[11px] font-bold text-sand-400 uppercase tracking-wide">{item.category}</p>
-                      <p className="text-xs font-extrabold text-sand-900 truncate mt-0.5">{item.name}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
-            userHistory.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-sand-300">
-                <p className="text-sand-500 text-sm font-semibold">No outfit history yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {userHistory.map((outfit) => (
-                  <div key={outfit._id} className="bg-white rounded-2xl border border-sand-200 p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Calendar className="h-3.5 w-3.5 text-sand-400" />
-                      <span className="text-xs font-extrabold text-sand-700">{outfit.date}</span>
-                      <Badge variant={outfit.source === "ai" ? "accent" : "neutral"} className="ml-auto text-[10px]">
-                        {outfit.source === "ai" ? "📸 AI" : "Manual"}
-                      </Badge>
-                    </div>
-                    <div className="flex flex-wrap items-end gap-2">
-                      {outfit.itemIds?.map((item, idx) => (
-                        <React.Fragment key={item._id}>
-                          {idx > 0 && <span className="text-base font-black text-sand-300 self-center pb-5">+</span>}
-                          <div className="flex flex-col items-center gap-1 w-16">
-                            <div className="w-16 h-20 rounded-xl overflow-hidden bg-sand-100 border-2 border-sand-200 shadow-sm flex items-center justify-center">
-                              {item.imageUrl ? (
-                                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <Shirt className="h-6 w-6 text-sand-300" />
-                              )}
+            /* ── HISTORY TAB ── */
+            <div>
+              {userHistory.length === 0 ? (
+                <div className="bg-white rounded-3xl border border-sand-200 p-8 text-center text-sand-400">
+                  <HistoryIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-xs font-semibold">No wear history recorded yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {userHistory.map((outfit) => (
+                    <div key={outfit._id} className="bg-white rounded-2xl border border-sand-200 p-4 shadow-xs">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Calendar className="h-3.5 w-3.5 text-sand-400" />
+                        <span className="text-xs font-extrabold text-sand-700">{outfit.date}</span>
+                        <Badge variant={outfit.source === "ai" ? "accent" : "neutral"} className="ml-auto text-[10px]">
+                          {outfit.source === "ai" ? (
+                            <span className="flex items-center gap-1">
+                              <Camera className="h-3 w-3 inline" /> AI
+                            </span>
+                          ) : (
+                            "Manual"
+                          )}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap items-end gap-2">
+                        {outfit.itemIds?.map((item, idx) => (
+                          <React.Fragment key={item._id}>
+                            {idx > 0 && <span className="text-base font-black text-sand-300 self-center pb-5">+</span>}
+                            <div className="flex flex-col items-center gap-1 w-16">
+                              <div className="w-16 h-20 rounded-xl overflow-hidden bg-sand-100 border-2 border-sand-200 shadow-sm flex items-center justify-center">
+                                {item.imageUrl ? (
+                                  <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <Shirt className="h-6 w-6 text-sand-300" />
+                                )}
+                              </div>
+                              <span className="text-[9px] font-bold text-sand-500 text-center truncate w-full">{item.category}</span>
                             </div>
-                            <span className="text-[9px] font-bold text-sand-500 text-center truncate w-full">{item.category}</span>
-                            <span className="text-[10px] font-extrabold text-sand-800 text-center truncate w-full">{item.name}</span>
-                          </div>
-                        </React.Fragment>
-                      ))}
+                          </React.Fragment>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )
+                  ))}
+                </div>
+              )}
+            </div>
           )
         )}
       </div>

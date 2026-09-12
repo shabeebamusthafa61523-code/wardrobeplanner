@@ -1,5 +1,5 @@
-﻿import React, { useState } from "react";
-import { X, LogIn, UserPlus, CheckCircle2, LogOut } from "lucide-react";
+import React, { useState } from "react";
+import { X, LogIn, UserPlus, CheckCircle2, LogOut, Crown, AlertTriangle } from "lucide-react";
 import { registerUser, loginUser, logoutUser, isLoggedIn } from "../services/api";
 
 export const UserAuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
@@ -26,7 +26,7 @@ export const UserAuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
       const res = mode === "register"
         ? await registerUser({ name: cleanName, password })
         : await loginUser({ name: cleanName, password });
-      setSuccessMsg(res.message || "✓ Signed in successfully!");
+      setSuccessMsg(res.message || "Signed in successfully!");
       setLoading(false);
       setTimeout(() => { onAuthSuccess && onAuthSuccess(res.user); handleClose(); }, 1000);
     } catch (err) {
@@ -49,7 +49,7 @@ export const UserAuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
         {/* Header */}
         <div className="px-6 py-4 border-b border-sand-100 flex items-center justify-between bg-sand-50">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain" />
+            <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain logo-theme-aware" />
             <h2 className="text-lg font-bold text-sand-900">
               {loggedIn ? "My Account" : mode === "login" ? "Sign In" : "Create Account"}
             </h2>
@@ -69,12 +69,19 @@ export const UserAuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
               <div>
                 <p className="text-xs font-bold text-sand-400 uppercase tracking-widest">Signed in as</p>
                 <p className="text-xl font-extrabold text-sand-900 capitalize mt-0.5">{currentUserName}</p>
-                <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                <span className={`inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
                   currentUserRole === "superadmin"
                     ? "bg-amber-100 text-amber-800 border border-amber-200"
                     : "bg-sand-100 text-sand-600 border border-sand-200"
                 }`}>
-                  {currentUserRole === "superadmin" ? "👑 Superadmin" : "User"}
+                  {currentUserRole === "superadmin" ? (
+                    <>
+                      <Crown className="h-3 w-3 text-amber-600 flex-shrink-0" />
+                      <span>Superadmin</span>
+                    </>
+                  ) : (
+                    "User"
+                  )}
                 </span>
               </div>
             </div>
@@ -103,7 +110,10 @@ export const UserAuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
           /* ── LOGIN / REGISTER FORM ── */
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {errorMsg && (
-              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-semibold">⚠️ {errorMsg}</div>
+              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-semibold flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
             )}
             {successMsg && (
               <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-2 animate-pulse">

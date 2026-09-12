@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Sparkles, AlertTriangle, CheckCircle2, ArrowLeft, RefreshCw, Shirt, Edit3 } from 'lucide-react';
+import { Camera, Sparkles, AlertTriangle, CheckCircle2, ArrowLeft, RefreshCw, Shirt, Edit3, Eye, Info, MessageSquare } from 'lucide-react';
 import { scanOutfitImage, recordWear, isLoggedIn } from '../services/api';
 import { Badge } from '../components/Badge';
 import { WearTrackerModal } from '../components/WearTrackerModal';
@@ -137,7 +137,7 @@ export const AIScanner = () => {
           <span>Back</span>
         </button>
         <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800 flex items-center gap-1.5">
-          <img src="/logo.png" alt="Logo" className="h-5 w-5 object-contain" />
+          <img src="/logo.png" alt="Logo" className="h-5 w-5 object-contain logo-theme-aware" />
           <span>AI Outfit Scanner</span>
         </span>
       </div>
@@ -145,8 +145,9 @@ export const AIScanner = () => {
       {/* Main Scan Card */}
       <div className="bg-white rounded-3xl border border-sand-200 p-6 shadow-sm space-y-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-sand-900">
-            📸 Scan Today's Outfit
+          <h1 className="text-xl sm:text-2xl font-extrabold text-sand-900 flex items-center gap-2">
+            <Camera className="h-6 w-6 text-amber-500" />
+            <span>Scan Today's Outfit</span>
           </h1>
           <p className="text-xs text-sand-500 mt-1">
             Take or upload a photo of what you're wearing today. AI vision will match it with your saved wardrobe.
@@ -156,8 +157,8 @@ export const AIScanner = () => {
         {/* Saved Success Toast */}
         {savedSuccess && (
           <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm font-bold flex items-center gap-2 animate-bounce">
-            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-            <span>✓ Outfit saved to your wear history! Redirecting...</span>
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+            <span>Outfit saved to your wear history! Redirecting...</span>
           </div>
         )}
 
@@ -245,8 +246,9 @@ export const AIScanner = () => {
         {scanResult && scanResult.matches && (
           <div className="space-y-6 pt-2 border-t border-sand-200 animate-fadeIn">
             {scanResult.isFallback && (
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold">
-                ℹ️ {scanResult.message || 'AI scanner active in Heuristic Mode.'}
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-center gap-2">
+                <Info className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                <span>{scanResult.message || 'AI scanner active in Heuristic Mode.'}</span>
               </div>
             )}
 
@@ -278,7 +280,13 @@ export const AIScanner = () => {
                             variant={isSelected ? 'primary' : 'neutral'}
                             className={isSelected ? 'bg-white/20 text-white border-white/30' : ''}
                           >
-                            {match.visualMatch ? '👁 Visual Match' : `Detected: ${match.detectedCategory} (${match.detectedColor})`}
+                            {match.visualMatch ? (
+                              <span className="flex items-center gap-1">
+                                <Eye className="h-3 w-3 inline" /> Visual Match
+                              </span>
+                            ) : (
+                              `Detected: ${match.detectedCategory} (${match.detectedColor})`
+                            )}
                           </Badge>
                           {match.visualMatch && (
                             <Badge variant="accent" className="text-[10px]">
@@ -316,8 +324,8 @@ export const AIScanner = () => {
                               {item.category} · {item.color}
                             </p>
                             {match.visualMatch && match.reason && (
-                              <p className={`text-[10px] mt-0.5 italic ${isSelected ? 'text-amber-300' : 'text-sand-400'}`}>
-                                💬 {match.reason}
+                              <p className={`text-[10px] mt-0.5 italic flex items-center gap-1 ${isSelected ? 'text-amber-300' : 'text-sand-400'}`}>
+                                <MessageSquare className="h-2.5 w-2.5 inline" /> {match.reason}
                               </p>
                             )}
                           </div>
@@ -338,14 +346,21 @@ export const AIScanner = () => {
                               : 'bg-slate-900 text-white'
                           }`}
                         >
-                          {isSelected ? '✓ Selected' : 'Select'}
+                          {isSelected ? (
+                            <span className="flex items-center gap-1">
+                              <CheckCircle2 className="h-3.5 w-3.5 inline text-emerald-600" /> Selected
+                            </span>
+                          ) : (
+                            'Select'
+                          )}
                         </button>
                       </div>
                     ) : (
                       /* Low confidence / Unmatched fallback */
                       <div className="py-2 text-xs">
-                        <p className="text-amber-800 font-bold">
-                          ⚠️ Low confidence: Could not automatically pinpoint exact match.
+                        <p className="text-amber-800 font-bold flex items-center gap-1.5">
+                          <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                          <span>Low confidence: Could not automatically pinpoint exact match.</span>
                         </p>
                         {match.candidates && match.candidates.length > 0 && (
                           <div className="mt-2 space-y-1">
@@ -400,7 +415,7 @@ export const AIScanner = () => {
                 ) : (
                   <>
                     <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                    <span>✓ Yes, Save Outfit</span>
+                    <span>Yes, Save Outfit</span>
                   </>
                 )}
               </button>

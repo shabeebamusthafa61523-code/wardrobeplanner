@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from './Badge';
-import { Clock, Shirt } from 'lucide-react';
+import { Clock, Shirt, Check } from 'lucide-react';
 
 export const ClothingCard = ({ item, onClick, selectable, isSelected, onSelect }) => {
   const formattedLastWorn = item.lastWornAt
@@ -38,7 +38,7 @@ export const ClothingCard = ({ item, onClick, selectable, isSelected, onSelect }
                 isSelected ? 'bg-slate-900 text-white shadow-md' : 'bg-white/80 backdrop-blur-sm border border-sand-300'
               }`}
             >
-              {isSelected ? '✓' : ''}
+              {isSelected ? <Check className="h-4 w-4 text-white" /> : ''}
             </div>
           </div>
         )}
