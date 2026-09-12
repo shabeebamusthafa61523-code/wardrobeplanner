@@ -1,4 +1,4 @@
-﻿const WardrobeItem = require("../models/WardrobeItem");
+const WardrobeItem = require("../models/WardrobeItem");
 const { visuallyMatchItemsInOutfit } = require("./ai.service");
 
 /**
@@ -47,42 +47,53 @@ const matchAIDetectedItemsWithWardrobe = async (detectedItems, userId = "default
   }
 
   // ── TEXT / HEURISTIC MATCHING (fallback) ──────────────────────────────────
-  console.log("[Matcher]: Using text/category+color heuristic matching.");
+  console.log("[Matcher]: Using text/category+color+pattern heuristic matching.");
   const matchedResults = [];
 
   for (const detected of detectedItems) {
     const targetCat = (detected.category || "").toLowerCase().trim();
     const targetColor = (detected.color || "").toLowerCase().trim();
+    const targetPattern = (detected.pattern || "").toLowerCase().trim();
 
     const scoredCandidates = userWardrobe.map((item) => {
       const itemCat = (item.category || "").toLowerCase().trim();
       const itemColor = (item.color || "").toLowerCase().trim();
+      const itemPattern = (item.pattern || "").toLowerCase().trim();
       let score = 0;
 
-      // Category match
+      // Category match (Max 40 points)
       if (itemCat === targetCat) {
-        score += 50;
+        score += 40;
       } else if (
         (itemCat.includes("top") || itemCat.includes("shirt") || itemCat.includes("kurti")) &&
         (targetCat.includes("top") || targetCat.includes("shirt") || targetCat.includes("kurti"))
       ) {
-        score += 30;
+        score += 25;
       } else if (
         (itemCat.includes("pants") || itemCat.includes("jeans") || itemCat.includes("trousers")) &&
         (targetCat.includes("pants") || targetCat.includes("jeans") || targetCat.includes("trousers"))
       ) {
-        score += 30;
+        score += 25;
       }
 
-      // Color match
+      // Color match (Max 35 points)
       if (itemColor === targetColor) {
-        score += 45;
-      } else if (itemColor.includes(targetColor) || targetColor.includes(itemColor)) {
         score += 35;
+      } else if (itemColor.includes(targetColor) || targetColor.includes(itemColor)) {
+        score += 25;
+      }
+
+      // Pattern match (Max 25 points)
+      if (targetPattern && itemPattern) {
+        if (itemPattern === targetPattern) {
+          score += 25;
+        } else if (itemPattern.includes(targetPattern) || targetPattern.includes(itemPattern)) {
+          score += 15;
+        }
       }
 
       const overallConfidence = Math.min(
-        Math.round((score / 95) * (detected.confidence || 0.9) * 100),
+        Math.round((score / 100) * (detected.confidence || 0.9) * 100),
         98
       );
 
@@ -100,6 +111,8 @@ const matchAIDetectedItemsWithWardrobe = async (detectedItems, userId = "default
     matchedResults.push({
       detectedCategory: detected.category,
       detectedColor: detected.color,
+      detectedPattern: detected.pattern,
+      detectedPrint: detected.print,
       aiConfidence: detected.confidence,
       visualMatch: false,
       matchedItem: bestMatch ? { ...bestMatch.item, matchConfidence: bestMatch.matchConfidence } : null,
