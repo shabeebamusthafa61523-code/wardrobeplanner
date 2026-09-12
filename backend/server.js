@@ -68,8 +68,9 @@ if (fs.existsSync(frontendDistPath)) {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('[API Error]:', err.stack);
-  res.status(500).json({
+  console.error('[API Error]:', err);
+  const status = err.status || err.statusCode || (err.name === 'MulterError' ? 400 : 500);
+  res.status(status).json({
     success: false,
     error: err.message || 'Server error',
   });

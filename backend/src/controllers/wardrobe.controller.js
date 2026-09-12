@@ -89,19 +89,23 @@ const createWardrobeItem = async (req, res) => {
     let imageUrl = req.file ? `/uploads/${req.file.filename}` : (req.body.imageUrl || '');
 
     if (req.file) {
-      const cloudRes = await uploadToCloudinary(req.file.path, 'wardrobe_items');
-      if (cloudRes && cloudRes.secure_url) {
-        imageUrl = cloudRes.secure_url;
+      try {
+        const cloudRes = await uploadToCloudinary(req.file.path, 'wardrobe_items');
+        if (cloudRes && cloudRes.secure_url) {
+          imageUrl = cloudRes.secure_url;
+        }
+      } catch (cloudErr) {
+        console.error('[Wardrobe Controller] Cloudinary error:', cloudErr.message);
       }
     }
 
-    const defaultName = name && name.trim() ? name.trim() : `Clothing Item #${Math.floor(100 + Math.random() * 900)}`;
+    const defaultName = name && typeof name === 'string' && name.trim() ? name.trim() : `Clothing Item #${Math.floor(100 + Math.random() * 900)}`;
 
     const newItem = await WardrobeItem.create({
       userId,
       name: defaultName,
-      category: (category || 'other').toLowerCase().trim(),
-      color: (color || 'custom').toLowerCase().trim(),
+      category: String(category || 'other').toLowerCase().trim(),
+      color: String(color || 'custom').toLowerCase().trim(),
       pattern: pattern || 'Solid',
       season: season || 'All Season',
       notes: notes || '',
@@ -114,7 +118,8 @@ const createWardrobeItem = async (req, res) => {
       data: newItem,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('[Wardrobe Controller Error]:', err);
+    res.status(500).json({ success: false, error: err.message || 'Failed to save wardrobe item' });
   }
 };
 
@@ -122,21 +127,25 @@ const createWardrobeItem = async (req, res) => {
 const updateWardrobeItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateFields = req.body;
+    const updateFields = { ...req.body };
 
     if (req.file) {
       updateFields.imageUrl = `/uploads/${req.file.filename}`;
-      const cloudRes = await uploadToCloudinary(req.file.path, 'wardrobe_items');
-      if (cloudRes && cloudRes.secure_url) {
-        updateFields.imageUrl = cloudRes.secure_url;
+      try {
+        const cloudRes = await uploadToCloudinary(req.file.path, 'wardrobe_items');
+        if (cloudRes && cloudRes.secure_url) {
+          updateFields.imageUrl = cloudRes.secure_url;
+        }
+      } catch (cloudErr) {
+        console.error('[Wardrobe Controller] Cloudinary update error:', cloudErr.message);
       }
     }
 
     if (updateFields.category) {
-      updateFields.category = updateFields.category.toLowerCase().trim();
+      updateFields.category = String(updateFields.category).toLowerCase().trim();
     }
     if (updateFields.color) {
-      updateFields.color = updateFields.color.toLowerCase().trim();
+      updateFields.color = String(updateFields.color).toLowerCase().trim();
     }
 
     const item = await WardrobeItem.findByIdAndUpdate(id, updateFields, { new: true });
@@ -146,7 +155,8 @@ const updateWardrobeItem = async (req, res) => {
 
     res.json({ success: true, data: item });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('[Wardrobe Controller Update Error]:', err);
+    res.status(500).json({ success: false, error: err.message || 'Failed to update item' });
   }
 };
 

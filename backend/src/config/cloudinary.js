@@ -11,20 +11,25 @@ const fs = require('fs');
 const uploadToCloudinary = async (localFilePath, folder = 'wardrobe_items') => {
   if (!localFilePath) return null;
 
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const cloudUrl = process.env.CLOUDINARY_URL;
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME ? process.env.CLOUDINARY_CLOUD_NAME.trim() : '';
+  const apiKey = process.env.CLOUDINARY_API_KEY ? process.env.CLOUDINARY_API_KEY.trim() : '';
+  const apiSecret = process.env.CLOUDINARY_API_SECRET ? process.env.CLOUDINARY_API_SECRET.trim() : '';
 
-  if (!cloudName || !apiKey || !apiSecret) {
-    console.warn('Cloudinary credentials missing in .env');
+  if (cloudUrl && cloudUrl.trim()) {
+    cloudinary.config({
+      cloudinary_url: cloudUrl.trim(),
+    });
+  } else if (cloudName && apiKey && apiSecret) {
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+    });
+  } else {
+    console.warn('[Cloudinary] Missing credentials (CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET missing in environment)');
     return null;
   }
-
-  cloudinary.config({
-    cloud_name: cloudName,
-    api_key: apiKey,
-    api_secret: apiSecret,
-  });
 
   try {
     const result = await cloudinary.uploader.upload(localFilePath, {
@@ -34,12 +39,16 @@ const uploadToCloudinary = async (localFilePath, folder = 'wardrobe_items') => {
 
     // Clean up temporary local file after successful Cloudinary upload
     if (fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
+      try {
+        fs.unlinkSync(localFilePath);
+      } catch (e) {
+        console.warn('Failed to delete temp file:', e.message);
+      }
     }
 
     return result;
   } catch (error) {
-    console.warn('Cloudinary Upload Notice (Falling back to local storage):', error.message || error);
+    console.error('[Cloudinary Upload Error]:', error.message || error);
     return null;
   }
 };

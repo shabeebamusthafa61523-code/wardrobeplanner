@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://wardrobeplanner-1.onrender.com/api';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://wardrobeplanner-1.onrender.com/api');
 export const SERVER_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
 const api = axios.create({
@@ -90,16 +92,12 @@ export const fetchWardrobeItemById = async (id) => {
 };
 
 export const createWardrobeItem = async (formData) => {
-  const response = await api.post('/wardrobe', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const response = await api.post('/wardrobe', formData);
   return response.data;
 };
 
 export const updateWardrobeItem = async (id, formData) => {
-  const response = await api.put(`/wardrobe/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const response = await api.put(`/wardrobe/${id}`, formData);
   return response.data;
 };
 
@@ -149,9 +147,7 @@ export const removePlannerDay = async (day) => {
 export const scanOutfitImage = async (file) => {
   const formData = new FormData();
   formData.append('image', file);
-  const response = await api.post('/ai/scan-outfit', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const response = await api.post('/ai/scan-outfit', formData);
   return response.data;
 };
 
