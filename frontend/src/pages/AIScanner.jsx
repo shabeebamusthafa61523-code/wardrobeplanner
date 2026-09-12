@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Sparkles, AlertTriangle, CheckCircle2, ArrowLeft, RefreshCw, Shirt, Edit3, Eye, Info, MessageSquare } from 'lucide-react';
+import Cropper from 'react-easy-crop';
+import { Camera, Sparkles, AlertTriangle, CheckCircle2, ArrowLeft, RefreshCw, Shirt, Edit3, Eye, Info, MessageSquare, Crop, ZoomIn, Check, X } from 'lucide-react';
 import { scanOutfitImage, recordWear, isLoggedIn } from '../services/api';
 import { Badge } from '../components/Badge';
 import { WearTrackerModal } from '../components/WearTrackerModal';
+import { getCroppedImg } from '../utils/cropImage';
 
 export const AIScanner = () => {
   const navigate = useNavigate();
@@ -18,6 +20,14 @@ export const AIScanner = () => {
 
   // User override match selection state
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
+
+  // Image Cropping States
+  const [rawImageSrc, setRawImageSrc] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [aspect, setAspect] = useState(3 / 4);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   if (!isLoggedIn()) {
     return (
@@ -64,11 +74,32 @@ export const AIScanner = () => {
   const handleImageCapture = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      const url = URL.createObjectURL(file);
+      setRawImageSrc(url);
+      setZoom(1);
+      setCrop({ x: 0, y: 0 });
+      setIsCropping(true);
       setScanResult(null);
       setScanError('');
       setSavedSuccess(false);
+    }
+  };
+
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleApplyCrop = async () => {
+    if (!rawImageSrc || !croppedAreaPixels) return;
+    try {
+      const croppedData = await getCroppedImg(rawImageSrc, croppedAreaPixels);
+      if (croppedData) {
+        setImageFile(croppedData.file);
+        setImagePreview(croppedData.previewUrl);
+      }
+      setIsCropping(false);
+    } catch (err) {
+      setScanError('Failed to crop image.');
     }
   };
 
@@ -142,6 +173,114 @@ export const AIScanner = () => {
         </span>
       </div>
 
+      {/* ── CROPPER OVERLAY MODAL ── */}
+      {isCropping && rawImageSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-sand-900/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-slate-900 text-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-700 flex flex-col h-[85vh] max-h-[650px] animate-fadeIn z-50 relative">
+            {/* Cropper Header */}
+            <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+              <div className="flex items-center gap-2">
+                <Crop className="h-5 w-5 text-amber-400" />
+                <h3 className="text-sm font-bold tracking-tight">Crop Outfit Photo for AI</h3>
+              </div>
+              <button
+                onClick={() => setIsCropping(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Interactive Cropper Area */}
+            <div className="relative flex-1 bg-black overflow-hidden">
+              <Cropper
+                image={rawImageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={aspect}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+
+            {/* Cropper Toolbar */}
+            <div className="p-4 bg-slate-950 border-t border-slate-800 space-y-3">
+              {/* Zoom Slider */}
+              <div className="flex items-center gap-3 px-2">
+                <ZoomIn className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-label="Zoom scale"
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                />
+              </div>
+
+              {/* Aspect Ratio Presets */}
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setAspect(3 / 4)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    aspect === 3 / 4
+                      ? 'bg-amber-400 text-slate-900 shadow-sm'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  3:4 Portrait
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAspect(1)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    aspect === 1
+                      ? 'bg-amber-400 text-slate-900 shadow-sm'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  1:1 Square
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAspect(4 / 3)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    aspect === 4 / 3
+                      ? 'bg-amber-400 text-slate-900 shadow-sm'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  4:3 Landscape
+                </button>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCropping(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 font-bold text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyCrop}
+                  className="flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                >
+                  <Check className="h-4 w-4" />
+                  <span>Apply Crop</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Scan Card */}
       <div className="bg-white rounded-3xl border border-sand-200 p-6 shadow-sm space-y-6">
         <div>
@@ -167,10 +306,21 @@ export const AIScanner = () => {
           {imagePreview ? (
             <div className="relative w-full aspect-[4/3] rounded-2xl bg-sand-100 border border-sand-300 overflow-hidden shadow-sm">
               <img src={imagePreview} alt="Outfit Preview" className="w-full h-full object-cover" />
+              {rawImageSrc && (
+                <button
+                  type="button"
+                  onClick={() => setIsCropping(true)}
+                  className="absolute top-3 left-3 px-3 py-1.5 bg-slate-900/80 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 backdrop-blur-sm"
+                >
+                  <Crop className="h-3.5 w-3.5" />
+                  <span>Crop / Adjust</span>
+                </button>
+              )}
               <button
                 onClick={() => {
                   setImageFile(null);
                   setImagePreview('');
+                  setRawImageSrc(null);
                   setScanResult(null);
                 }}
                 className="absolute top-3 right-3 px-3 py-1.5 bg-sand-900/80 hover:bg-sand-900 text-white rounded-full text-xs font-bold backdrop-blur-sm"
