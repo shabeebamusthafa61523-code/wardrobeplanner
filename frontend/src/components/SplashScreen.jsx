@@ -129,19 +129,12 @@ export const SplashScreen = ({
         </div>
       )}
 
-      {/* Dark overlay gradient for readable controls */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-slate-950/60 z-10 pointer-events-none" />
-
-      {/* Top Bar Controls */}
-      <div className="relative z-20 p-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="Logo" className="h-7 w-7 object-contain logo-theme-aware" />
-          <span className="font-extrabold text-sm tracking-wider uppercase text-sand-100">Wardrobe</span>
-        </div>
-
+      {/* Top Right Skip Button Only */}
+      <div className="relative z-20 p-4 sm:p-6 flex items-center justify-end">
         <div className="flex items-center gap-3">
           {!videoError && (
             <button
+              type="button"
               onClick={toggleMute}
               className="p-2.5 rounded-full bg-slate-900/60 hover:bg-slate-800 text-white/80 hover:text-white backdrop-blur-md border border-white/10 transition-all"
             >
@@ -149,22 +142,13 @@ export const SplashScreen = ({
             </button>
           )}
           <button
+            type="button"
             onClick={handleFinish}
-            className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold backdrop-blur-md border border-white/20 transition-all flex items-center gap-1.5 shadow-md"
+            className="px-4 py-2 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white text-xs font-bold backdrop-blur-md border border-white/20 transition-all flex items-center gap-1.5 shadow-md"
           >
             <span>Skip</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
-        </div>
-      </div>
-
-      {/* Bottom Branding / Progress Footer */}
-      <div className="relative z-20 p-6 sm:p-8 flex flex-col items-center text-center space-y-3">
-        <p className="text-xs font-semibold text-sand-300/80 tracking-widest uppercase">
-          Elevate Your Daily Style
-        </p>
-        <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full animate-pulse w-full" />
         </div>
       </div>
     </div>
