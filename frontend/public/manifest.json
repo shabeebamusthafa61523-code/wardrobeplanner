@@ -1,0 +1,16 @@
+{
+  "short_name": "Wardrobe",
+  "name": "Wardrobe — Personal Planner",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FAF9f6",
+  "theme_color": "#2C2720",
+  "display": "standalone",
+  "orientation": "portrait"
+}
