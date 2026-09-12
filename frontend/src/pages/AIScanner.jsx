@@ -29,6 +29,10 @@ export const AIScanner = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
 
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
   if (!isLoggedIn()) {
     return (
       <div className="space-y-6 pb-12 animate-fadeIn max-w-2xl mx-auto">
@@ -84,10 +88,6 @@ export const AIScanner = () => {
       setSavedSuccess(false);
     }
   };
-
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
 
   const handleApplyCrop = async () => {
     if (!rawImageSrc || !croppedAreaPixels) return;

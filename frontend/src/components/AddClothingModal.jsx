@@ -24,6 +24,10 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
 
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
   if (!isOpen) return null;
 
   const handleImageChange = (e) => {
@@ -37,10 +41,6 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
       setImageUrlInput('');
     }
   };
-
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
 
   const handleApplyCrop = async () => {
     if (!rawImageSrc || !croppedAreaPixels) return;
