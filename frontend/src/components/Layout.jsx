@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home, Shirt, Calendar, History, Camera, Plus, User, LogOut, Shield } from 'lucide-react';
+import { Home, Shirt, Calendar, History, Camera, Plus, User, LogOut, Shield, Sun, Moon } from 'lucide-react';
 import { AddClothingModal } from './AddClothingModal';
 import { WearTrackerModal } from './WearTrackerModal';
 import { UserAuthModal } from './UserAuthModal';
@@ -13,6 +13,9 @@ export const Layout = ({ children, onRefreshData }) => {
   const [currentUserName, setCurrentUserName] = useState('');
   const [currentUserRole, setCurrentUserRole] = useState('user');
 
+  // Theme Light / Dark state
+  const [theme, setTheme] = useState(() => localStorage.getItem('wardrobe_theme') || 'light');
+
   // Hidden admin PIN modal
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [logoClickCount, setLogoClickCount] = useState(0);
@@ -24,6 +27,20 @@ export const Layout = ({ children, onRefreshData }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    localStorage.setItem('wardrobe_theme', nextTheme);
+  };
 
   useEffect(() => {
     const savedName = localStorage.getItem('wardrobe_user_name');
@@ -135,6 +152,26 @@ export const Layout = ({ children, onRefreshData }) => {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+            {/* Theme Toggle Button (Light / Dark) */}
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 sm:px-3 sm:py-2 rounded-xl bg-sand-100 dark:bg-slate-800 hover:bg-sand-200 text-slate-800 dark:text-amber-400 text-xs font-bold transition-all border border-sand-200 dark:border-slate-700 flex items-center gap-1.5 shadow-2xs"
+              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+              aria-label="Toggle Theme"
+            >
+              {theme === 'light' ? (
+                <>
+                  <Moon className="h-4 w-4 text-slate-700" />
+                  <span className="hidden sm:inline">Dark</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="h-4 w-4 text-amber-400" />
+                  <span className="hidden sm:inline">Light</span>
+                </>
+              )}
+            </button>
+
             {/* User Profile Badge */}
             <button
               onClick={() => setIsAuthModalOpen(true)}
