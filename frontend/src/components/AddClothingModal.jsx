@@ -143,7 +143,6 @@ export const AddClothingModal = ({ isOpen, onClose, onItemAdded }) => {
                   <input
                     type="file"
                     accept="image/*"
-                    capture="environment"
                     onChange={handleImageChange}
                     className="hidden"
                   />
