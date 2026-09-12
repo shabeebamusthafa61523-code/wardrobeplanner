@@ -23,6 +23,11 @@ html.dark body {
   color: #f8fafc;
 }
 
+/* Dark Mode Logo Swap */
+html.dark img[src="/logo.png"] {
+  content: url("/logo-dark.png") !important;
+}
+
 html.dark .bg-sand-50,
 html.dark .bg-sand-50\/50 {
   background-color: #0b0f19 !important;
