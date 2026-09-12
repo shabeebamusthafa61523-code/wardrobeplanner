@@ -1,15 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
 
-export const SplashScreen = ({ videoSrc = '/splash.mp4', onComplete }) => {
+export const SplashScreen = ({
+  desktopVideo = '/splash.mp4',
+  mobileVideo = '/splashmb.mp4',
+  onComplete,
+}) => {
   const [fadingOut, setFadingOut] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [videoError, setVideoError] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const videoRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const currentVideoSrc = isMobile ? mobileVideo : desktopVideo;
 
   useEffect(() => {
     // Attempt autoplay
     if (videoRef.current) {
+      videoRef.current.load();
       videoRef.current.play().catch(() => {
         // Autoplay policy prevented playback or file missing
         setVideoError(true);
@@ -22,7 +38,7 @@ export const SplashScreen = ({ videoSrc = '/splash.mp4', onComplete }) => {
     }, 6000);
 
     return () => clearTimeout(maxTimer);
-  }, []);
+  }, [currentVideoSrc]);
 
   const handleFinish = () => {
     setFadingOut(true);
@@ -48,14 +64,17 @@ export const SplashScreen = ({ videoSrc = '/splash.mp4', onComplete }) => {
       {!videoError ? (
         <video
           ref={videoRef}
-          src={videoSrc}
+          key={currentVideoSrc}
           autoPlay
           muted={isMuted}
           playsInline
           onEnded={handleFinish}
           onError={() => setVideoError(true)}
           className="absolute inset-0 w-full h-full object-cover z-0"
-        />
+        >
+          <source src={mobileVideo} media="(max-width: 767px)" type="video/mp4" />
+          <source src={desktopVideo} media="(min-width: 768px)" type="video/mp4" />
+        </video>
       ) : (
         /* Fallback Animated Gradient & Logo if video file not yet added */
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950 flex flex-col items-center justify-center p-6 text-center z-0">

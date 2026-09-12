@@ -23,7 +23,13 @@ export function App() {
 
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      {showSplash && <SplashScreen videoSrc="/splash.mp4" onComplete={handleSplashComplete} />}
+      {showSplash && (
+        <SplashScreen
+          desktopVideo="/splash.mp4"
+          mobileVideo="/splashmb.mp4"
+          onComplete={handleSplashComplete}
+        />
+      )}
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
