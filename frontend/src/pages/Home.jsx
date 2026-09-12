@@ -73,7 +73,7 @@ export const Home = () => {
         const hour = new Date().getHours();
         const timeEmoji = hour < 12 ? '🌅' : hour < 17 ? '☀️' : '🌙';
         return (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-sand-100 via-white to-sand-100 p-6 rounded-3xl border border-sand-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-sand-100 via-white to-sand-100 dark:bg-none dark:bg-[#151e2e] p-6 rounded-3xl border border-sand-200 shadow-xs">
             <div className="flex items-center gap-4">
               <img src="/logo.png" alt="Logo" className="h-14 w-14 object-contain flex-shrink-0 drop-shadow-md" />
               <div>

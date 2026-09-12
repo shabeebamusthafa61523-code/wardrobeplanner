@@ -50,14 +50,12 @@ html.dark .bg-white {
 }
 
 /* Gradients on Home / Welcome banner */
-html.dark .from-sand-100 {
-  --tw-gradient-from: #151e2e !important;
-}
-html.dark .via-white {
-  --tw-gradient-via: #1e293b !important;
-}
-html.dark .to-sand-100 {
-  --tw-gradient-to: #151e2e !important;
+html.dark .bg-gradient-to-r,
+html.dark .bg-gradient-to-l,
+html.dark .bg-gradient-to-t,
+html.dark .bg-gradient-to-b {
+  background-image: none !important;
+  background-color: #151e2e !important;
 }
 
 /* All Borders */
